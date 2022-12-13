@@ -1,11 +1,10 @@
 import React, { useState, useCallback } from "react";
 import AuthorizationForm from "./AuthorizationForm";
-import { Link, useHistory } from "react-router-dom";
+import { Link } from "react-router-dom";
 
-const Register = ({onRegister, openFailTooltip, openSuccessTooltip}) => {
+const Register = ({ onRegister }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const history = useHistory();
 
   const onEmailChange = (e) => {
     setEmail(e.target.value);
@@ -18,21 +17,13 @@ const Register = ({onRegister, openFailTooltip, openSuccessTooltip}) => {
   const resetForm = useCallback(() => {
     setEmail("");
     setPassword("");
-  })
+  });
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    onRegister({email, password})
-    .then(resetForm())
-    .then(() => {
-      openSuccessTooltip()
-    })
-    .then(() => history.push("/sign-in"))
-    .catch((err) => {
-          console.error(`Ошибка: ${err}`);
-          openFailTooltip();
-        }); 
+    onRegister({ email, password });
+    resetForm();
   };
 
   return (

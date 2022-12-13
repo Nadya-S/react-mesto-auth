@@ -1,11 +1,9 @@
 import React, { useState, useCallback } from "react";
 import AuthorizationForm from "./AuthorizationForm";
-import { useHistory } from "react-router-dom";
 
-const Login = ({onLogin, openFailTooltip}) => {
+const Login = ({onLogin}) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const history = useHistory();
 
   const onEmailChange = (e) => {
     setEmail(e.target.value);
@@ -22,13 +20,8 @@ const Login = ({onLogin, openFailTooltip}) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onLogin({email, password})
-    .then(resetForm())
-    .then(() => history.push("/"))
-    .catch((err) => {
-          console.error(`Ошибка: ${err}`);
-          openFailTooltip();
-        }); 
+    onLogin({email, password});
+    resetForm();
   };
 
   return (

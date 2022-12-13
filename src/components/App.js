@@ -30,12 +30,16 @@ const App = () => {
   const history = useHistory();
 
   const auth = (token) => {
-    return Auth.checkToken(token).then((res) => {
-      if (res) {
-        setLoggedIn(true);
-        setUserEmail(res.data.email);
-      }
-    });
+    return Auth.checkToken(token)
+      .then((res) => {
+        if (res) {
+          setLoggedIn(true);
+          setUserEmail(res.data.email);
+        }
+      })
+      .catch((err) => {
+        console.error(`Ошибка: ${err}`);
+      });
   };
 
   useEffect(() => {
@@ -58,11 +62,7 @@ const App = () => {
         .catch((err) => {
           console.error(`Ошибка: ${err}`);
         });
-    }
-  }, [loggedIn]);
 
-  useEffect(() => {
-    if (loggedIn) {
       Api.getUserInfo()
         .then((user) => {
           setCurrentUser(user);
@@ -153,30 +153,42 @@ const App = () => {
       });
   };
 
-  const onLogin = ({ email, password }) => {
-    return Auth.authorize(email, password).then((data) => {
-      if (data.token) {
-        localStorage.setItem("token", data.token);
-        setLoggedIn(true);
-      }
-    });
+  const handleLogin = ({ email, password }) => {
+    return Auth.authorize(email, password)
+      .then((data) => {
+        if (data.token) {
+          localStorage.setItem("token", data.token);
+          setLoggedIn(true);
+          history.push("/");
+        }
+      })
+      .catch((err) => {
+        console.error(`Ошибка: ${err}`);
+        openFailTooltip();
+      });
   };
 
-  const onRegister = ({ email, password }) => {
-    return Auth.register(email, password).then((res) => {
-      return res;
-    });
+  const handleRegister = ({ email, password }) => {
+    return Auth.register(email, password)
+      .then(() => {
+        openSuccessTooltip();
+        history.push("/sign-in");
+      })
+      .catch((err) => {
+        console.error(`Ошибка: ${err}`);
+        openFailTooltip();
+      });
   };
 
   const openSuccessTooltip = () => {
     setSuccessTooltip(true);
     setIsInfoTooltipOpen(true);
-  }
+  };
 
   const openFailTooltip = () => {
     setSuccessTooltip(false);
     setIsInfoTooltipOpen(true);
-  }
+  };
 
   return (
     <CurrentUserContext.Provider value={currentUser}>
@@ -198,10 +210,10 @@ const App = () => {
               onCardDelete={handleCardDelete}
             />
             <Route path="/sign-in">
-              <Login onLogin={onLogin} openFailTooltip={openFailTooltip}/>
+              <Login onLogin={handleLogin} />
             </Route>
             <Route path="/sign-up">
-              <Register onRegister={onRegister} openSuccessTooltip={openSuccessTooltip} openFailTooltip={openFailTooltip}/>
+              <Register onRegister={handleRegister} />
             </Route>
             <Route path="*">
               {loggedIn ? <Redirect to="/" /> : <Redirect to="/sign-in" />}
@@ -210,7 +222,11 @@ const App = () => {
           {loggedIn && <Footer />}
         </div>
 
-        <InfoTooltip isOpen={isInfoTooltipOpen} onClose={closeAllPopups} successTooltip={successTooltip}/>
+        <InfoTooltip
+          isOpen={isInfoTooltipOpen}
+          onClose={closeAllPopups}
+          successTooltip={successTooltip}
+        />
         <EditAvatarPopup
           isOpen={isEditAvatarPopupOpen}
           onClose={closeAllPopups}
